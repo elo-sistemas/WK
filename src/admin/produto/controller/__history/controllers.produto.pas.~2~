@@ -1,0 +1,48 @@
+unit controllers.produto;
+
+interface
+uses
+  model.produto,
+  dao.produto,
+  System.SysUtils,
+  Datasnap.DBClient,
+  FireDAC.Comp.Client;
+
+type
+  TClienteCTRL = class
+    private
+      {private declarations}
+
+    public
+      function Pesquisar(aProduto: TProduto; aDataSet: TFDMemTable; aPesquisa: String):Boolean;
+
+  end;
+
+implementation
+
+{ TPedidoCTRL }
+
+function TClienteCTRL.Pesquisar(aProduto: TProduto; aDataSet: TFDMemTable;
+  aPesquisa: String): Boolean;
+
+var
+  dao: TProdutoDAO;
+begin
+  {$region 'pesquisar'}
+  Result := True;
+  dao := TClienteDAO.Create;
+
+  try
+    dao.Pesquisar(aCliente, aDataSet, aPesquisa);
+  finally
+    dao.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+
+
+implementation
+
+end.

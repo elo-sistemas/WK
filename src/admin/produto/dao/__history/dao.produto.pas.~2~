@@ -1,0 +1,64 @@
+unit dao.produto;
+
+interface
+
+uses
+  model.produto,
+  DAO.Connection,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  FireDAC.Phys.FB,
+  Data.DB,
+  System.SysUtils,
+  System.StrUtils;
+
+type
+  TCProdutoDAO = class
+  private
+     {private declarations}
+
+    fConn: TFDConnection;
+    aQRY: TFDQuery;
+
+  procedure CriarConexao;
+
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Pesquisar(aProduto: TProduto; aDataSet: TFDMemTable; aPesquisa: String);
+
+  end;
+
+
+implementation
+
+{ TCProdutoDAO }
+
+constructor TCProdutoDAO.Create;
+begin
+  fConn := TConnection.CreateConnection;
+
+end;
+
+procedure TCProdutoDAO.CriarConexao;
+begin
+
+end;
+
+destructor TCProdutoDAO.Destroy;
+begin
+  if (Assigned(fConn) ) then
+    fConn.DisposeOf;
+
+  inherited;
+end;
+
+procedure TCProdutoDAO.Pesquisar(aProduto: TProduto; aDataSet: TFDMemTable;
+  aPesquisa: String);
+begin
+  aQRY            := TFDQuery.Create(nil);
+  aQRY.Connection := FConn;
+
+end;
+
+end.

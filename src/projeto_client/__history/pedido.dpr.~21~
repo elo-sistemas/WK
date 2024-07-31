@@ -1,0 +1,36 @@
+program pedido;
+
+uses
+  Vcl.Forms,
+  FireDAC.VCLUI.Wait,
+  FireDAC.Phys.PG,
+  FireDAC.Phys.PGDef,
+  Form.View.Menu.Principal in '..\admin\Form.View.Menu.Principal.pas' {FormViewMenuPrincipal},
+  Form.View.Padrao in '..\template\Form.View.Padrao.pas' {FormViewPadrao},
+  model.pedido in '..\admin\pedido\model\model.pedido.pas',
+  dao.pedido in '..\admin\pedido\dao\dao.pedido.pas',
+  DAO.Connection in '..\comun\units\DAO.Connection.pas',
+  uFunctions in '..\comun\units\uFunctions.pas',
+  controllers.pedido in '..\admin\pedido\controller\controllers.pedido.pas',
+  Form.View.Pedido.Cad in '..\admin\pedido\view\Form.View.Pedido.Cad.pas' {FormViewPedidoCad},
+  Form.View.Pesquisa.Padrao in '..\template\Form.View.Pesquisa.Padrao.pas' {FormViewPesquisaPadrao},
+  Form.View.Pesquisa.Cliente in '..\admin\pedido\view\Form.View.Pesquisa.Cliente.pas' {FormViewPesquisaCliente},
+  dao.cliente in '..\admin\cliente\dao\dao.cliente.pas',
+  model.cliente in '..\admin\cliente\model\model.cliente.pas',
+  controllers.cliente in '..\admin\cliente\controller\controllers.cliente.pas',
+  model.produto in '..\admin\produto\model\model.produto.pas',
+  dao.produto in '..\admin\produto\dao\dao.produto.pas',
+  controllers.produto in '..\admin\produto\controller\controllers.produto.pas',
+  model.pedido.produto in '..\admin\pedido_produto\model\model.pedido.produto.pas',
+  dao.pedido.produto in '..\admin\pedido_produto\dao\dao.pedido.produto.pas',
+  controllers.pedido.produto in '..\admin\pedido_produto\controller\controllers.pedido.produto.pas',
+  Form.View.Pesquisa.Produto in '..\admin\pedido\view\Form.View.Pesquisa.Produto.pas' {FormViewPesquisaProduto};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TFormViewMenuPrincipal, FormViewMenuPrincipal);
+  Application.Run;
+end.

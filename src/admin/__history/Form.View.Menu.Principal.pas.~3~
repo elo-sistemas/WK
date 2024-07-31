@@ -1,0 +1,86 @@
+unit Form.View.Menu.Principal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+  Vcl.Imaging.jpeg, Vcl.CategoryButtons, Vcl.WinXCtrls, System.Actions,
+  Vcl.ActnList, System.ImageList, Vcl.ImgList;
+
+type
+  TFormViewMenuPrincipal = class(TForm)
+    pnlPrincipal: TPanel;
+    imgTop: TImage;
+    Label3: TLabel;
+    Label2: TLabel;
+    Label1: TLabel;
+    ImageList1: TImageList;
+    ImageList2: TImageList;
+    actPrincipal: TActionList;
+    actCadastros: TAction;
+    actRelatorios: TAction;
+    actClose: TAction;
+    actDetalhe: TActionList;
+    actPedido: TAction;
+    spvPrincipal: TSplitView;
+    Image4: TImage;
+    CategoryButtonsPrincipal: TCategoryButtons;
+    CategoryButtonsConfiguracao: TCategoryButtons;
+    spvCadastro: TSplitView;
+    CategoryButtonsCadastro: TCategoryButtons;
+    spvRelatorio: TSplitView;
+    CategoryButtonsRelatorio: TCategoryButtons;
+    procedure lblSairClick(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure actCadastrosExecute(Sender: TObject);
+    procedure actRelatoriosExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FActiveForm: TForm;
+    procedure ShowForm(const AFormClass: TComponentClass; var AForm);
+
+  public
+    { Public declarations }
+  end;
+
+var
+  FormViewMenuPrincipal: TFormViewMenuPrincipal;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFormViewMenuPrincipal.actCadastrosExecute(Sender: TObject);
+begin
+  if (spvPrincipal.Opened) then
+    spvPrincipal.Close;
+
+  if (spvRelatorio.Opened) then
+    spvRelatorio.Close;
+
+  spvCadastro.Open;
+
+end;
+
+procedure TFormViewMenuPrincipal.actCloseExecute(Sender: TObject);
+begin
+   Application.Terminate;
+end;
+
+procedure TFormViewMenuPrincipal.lblSairClick(Sender: TObject);
+begin
+   Application.Terminate;
+end;
+
+procedure TFormViewMenuPrincipal.ShowForm(const AFormClass: TComponentClass;
+  var AForm);
+begin
+  if Assigned(FActiveForm) then
+    FActiveForm.Close;
+
+  TForm(AForm).Show;
+  FActiveForm := TForm(AForm);
+end;
+
+end.

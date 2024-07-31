@@ -1,0 +1,84 @@
+unit controllers.pedido;
+
+interface
+
+uses
+  model.pedido,
+  dao.pedido,
+  System.SysUtils,
+  Datasnap.DBClient,
+  FireDAC.Comp.Client;
+
+type
+  TPedidoCTRL = class
+    private
+      {private declarations}
+
+    public
+      function Adicionar(aPedido: TPedido; var aMsg: String): Boolean;
+      function Pesquisar(aPedido: TPedido; aDataSet: TFDMemTable; aPesquisa: String):Boolean;
+
+  end;
+
+implementation
+
+{ TPedidoCTRL }
+
+function TPedidoCTRL.Adicionar(aPedido: TPedido; var aMsg: String): Boolean;
+
+var
+  dao: TPedidoDAO;
+begin
+  {$region 'adicionar'}
+  Result := True;
+  aMsg   := EmptyStr;
+
+  if ( (aPedido.codigo_cli = 0) or (aPedido.codigo_cli.ToString = EmptyStr)) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Cliente é obrigatório. Verifique!';
+  end;
+
+  if (aPedido.valor_total = '0') then
+  begin
+    Result := False;
+    aMsg   := 'O campo Valor total não pode ser zero (0). Verifique!';
+  end;
+
+  if (Result) then
+  begin
+    dao := TPedidoDAO.Create;
+
+    try
+      dao.Adicionar(aPedido);
+
+    finally
+      dao.DisposeOf;
+    end;
+
+  end;
+  {$endregion}
+
+end;
+
+function TPedidoCTRL.Pesquisar(aPedido: TPedido; aDataSet: TFDMemTable;
+  aPesquisa: String): Boolean;
+
+var
+  dao: TPedidoDAO;
+begin
+  {$region 'pesquisar'}
+  Result := True;
+  dao := TPedidoDAO.Create;
+
+  try
+    dao.Pesquisar(aPedido, aDataSet, aPesquisa);
+  finally
+    dao.DisposeOf;
+  end;
+  {$endregion}
+
+
+end;
+
+end.

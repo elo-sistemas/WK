@@ -1,0 +1,217 @@
+unit dao.pedido.produto;
+
+interface
+
+uses
+  model.pedido.produto,
+  DAO.Connection,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  FireDAC.Phys.FB,
+  Data.DB,
+  System.SysUtils,
+  System.StrUtils;
+
+type
+  TPedidoProdutoDAO = class
+  private
+     {private declarations}
+
+    fConn: TFDConnection;
+    aQRY: TFDQuery;
+
+  procedure CriarConexao;
+
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Adicionar(aPedidoProduto: TPedidoProduto);
+      procedure Alterar(aPedidoProduto: TPedidoProduto);
+      procedure Excluir(aPedidoProduto: TPedidoProduto);
+      procedure Pesquisar(aPedidoProduto: TPedidoProduto; aDataSet: TFDMemTable; aPesquisa: String);
+
+  end;
+
+
+implementation
+
+{ TPedidoProdutoDAO }
+
+procedure TPedidoProdutoDAO.Adicionar(aPedidoProduto: TPedidoProduto);
+begin
+  {$region 'adicionar'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('INSERT INTO PEDIDO(codigo_ped, codigo_prod, quantidade, valor_unitario, valor_total) ');
+      aQRY.SQL.Add('VALUES(:codigo_ped, :codigo_prod, :quantidade, :valor_unitario, :valor_total)       ');
+
+      aQRY.ParamByName('codigo_ped').AsInteger   := aPedidoProduto.codigo_ped;
+      aQRY.ParamByName('codigo_prod').AsInteger  := aPedidoProduto.codigo_prod;
+      aQRY.ParamByName('quantidade').AsInteger   := aPedidoProduto.quantidade;
+      aQRY.ParamByName('valor_unitario').AsFloat := aPedidoProduto.valor_unitario;
+      aQRY.ParamByName('valor_total').AsFloat    := aPedidoProduto.valor_total;
+      aQRY.ExecSQL;
+      fConn.Commit;
+
+      aPedidoProduto.codigo := aQRY.ParamByName('codigo').AsInteger;  //devolve o código gerado para a tela de pedidos
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao gravar o(s) iten(s) do pedido. Verifique! '+ e.Message);
+      end;
+
+    end;
+
+  finally
+     FreeAndNil(aQRY);
+  end;
+  {$endregion}
+
+
+end;
+
+procedure TPedidoProdutoDAO.Alterar(aPedidoProduto: TPedidoProduto);
+begin
+  {$region 'alterar'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('UPDATE pedido_produto SET codigo_prod =:codigo_prod,      '); //neste caso só podem ser alterados os campos de quantidade, valor unitário dentro do grid
+      aQRY.SQL.Add('                          quantidade =:quantidade,        ');
+      aQRY.SQL.Add('                          valor_unitario =:valor_unitario ');
+      aQRY.SQL.Add('WHERE codigo =:codigo                                     ');
+
+      aQRY.ParamByName('codigo').AsInteger       := aPedidoProduto.codigo;
+      aQRY.ParamByName('codigo_prod').AsInteger  := aPedidoProduto.codigo_prod;
+      aQRY.ParamByName('quantidade').AsInteger   := aPedidoProduto.quantidade;
+      aQRY.ParamByName('valor_unitario').AsFloat := aPedidoProduto.valor_unitario;
+
+      aQRY.ExecSQL;
+      fConn.Commit;
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao alterar o(s) iten(s) do pedido. Verifique! '+ e.Message);
+      end;
+
+    end;
+
+  finally
+     FreeAndNil(aQRY);
+  end;
+  {$endregion}
+
+end;
+
+constructor TPedidoProdutoDAO.Create;
+begin
+  fConn := TConnection.CreateConnection;
+
+end;
+
+procedure TPedidoProdutoDAO.CriarConexao;
+begin
+  aQRY            := TFDQuery.Create(nil);
+  aQRY.Connection := FConn;
+
+end;
+
+destructor TPedidoProdutoDAO.Destroy;
+begin
+  if (Assigned(fConn) ) then
+    FreeAndNil(fConn);
+
+  inherited;
+end;
+
+procedure TPedidoProdutoDAO.Excluir(aPedidoProduto: TPedidoProduto);
+begin
+  {$region 'excluir'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('DELETE FROM pedido_produto ');
+      aQRY.SQL.Add('WHERE codigo =:codigo      ');
+
+      aQRY.ParamByName('codigo').AsInteger := aPedidoProduto.codigo;
+      aQRY.ExecSQL;
+
+      fConn.Commit;
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao alterar o(s) iten(s) do pedido. Verifique! '+ e.Message);
+      end;
+
+    end;
+
+  finally
+     FreeAndNil(aQRY);
+  end;
+
+  {$endregion}
+
+end;
+
+procedure TPedidoProdutoDAO.Pesquisar(aPedidoProduto: TPedidoProduto;
+  aDataSet: TFDMemTable; aPesquisa: String);
+begin
+  {$region 'pesquisar'}
+  CriarConexao;
+  try
+    try
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('select pp.codigo, pp.codigo_prod, p.descricao, pp.quantidade, pp.valor_unitario, pp.valor_total ');
+      aQRY.SQL.Add('FROM pedido_produto pp inner join produto p on p.codigo = pp.codigo_prod                        ');
+
+      if (aPesquisa <> EmptyStr) then
+      begin
+        if (TConnection.Numero(aPesquisa) ) then
+        begin
+          aQRY.SQL.Add('WHERE pp.codigo =:codigo ');
+          aQRY.Params.ParamByName('codigo').AsInteger := aPesquisa.ToInteger;
+        end
+
+        else
+        begin
+          aQRY.SQL.Add('WHERE UPPER(p.descricao) LIKE :descricao ');
+          aQRY.Params.ParamByName('descricao').AsString  := '%' + AnsiUpperCase(aPesquisa) + '%';
+        end;
+
+      end;
+
+      aQRY.SQL.Add('ORDER BY pp.codigo ');
+      aQRY.Open;
+
+      aDataSet.Data := aQRY.Data;
+
+    Except on
+      E: Exception do
+        raise Exception.Create('Erro ao pesquisar o(s) registro(s). Verifique! '+ e.Message);
+    end;
+
+  finally
+     FreeAndNil(aQRY);
+  end;
+  {$endregion}
+
+end;
+
+end.

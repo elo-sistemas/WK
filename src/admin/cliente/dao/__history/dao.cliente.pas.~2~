@@ -1,0 +1,61 @@
+unit dao.cliente;
+
+interface
+
+uses
+  model.cliente,
+  DAO.Connection,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  FireDAC.Phys.FB,
+  Data.DB,
+  System.SysUtils,
+  System.StrUtils;
+
+type
+  TClienteDAO = class
+  private
+     {private declarations}
+
+    fConn: TFDConnection;
+    aQRY: TFDQuery;
+
+  procedure CriarConexao;
+
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable; aPesquisa: String);
+
+  end;
+
+
+
+
+implementation
+
+{ TClienteDAO }
+
+constructor TClienteDAO.Create;
+begin
+
+end;
+
+procedure TClienteDAO.CriarConexao;
+begin
+
+end;
+
+destructor TClienteDAO.Destroy;
+begin
+
+  inherited;
+end;
+
+procedure TClienteDAO.Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable;
+  aPesquisa: String);
+begin
+
+end;
+
+end.

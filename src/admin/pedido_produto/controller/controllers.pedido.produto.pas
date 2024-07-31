@@ -1,0 +1,152 @@
+unit controllers.pedido.produto;
+
+interface
+
+uses
+  model.pedido.produto,
+  dao.pedido.produto,
+  System.SysUtils,
+  Datasnap.DBClient,
+  FireDAC.Comp.Client;
+
+type
+  TPedidoProdutoCTRL = class
+    private
+      {private declarations}
+
+    public
+      function Adicionar(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Alterar(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Excluir(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Pesquisar(aPedidoProduto: TPedidoProduto; aDataSet: TFDMemTable; aPesquisa: String):Boolean;
+
+  end;
+
+
+implementation
+
+{ TPedidoCTRL }
+
+function TPedidoProdutoCTRL.Adicionar(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+
+var
+  dao: TPedidoProdutoDAO;
+begin
+  {$region 'adicionar'}
+  Result := True;
+  aMsg   := EmptyStr;
+
+  if ( (aPedidoProduto.codigo_prod = 0) or (aPedidoProduto.codigo_prod.ToString = EmptyStr)) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Produto é obrigatório. Verifique!';
+  end;
+
+  if (aPedidoProduto.valor_total = 0) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Valor total não pode ser zero (0). Verifique!';
+  end;
+
+  if (aPedidoProduto.valor_unitario = 0) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Valor unitário não pode ser zero (0). Verifique!';
+  end;
+
+  if ((aPedidoProduto.quantidade = 0) and (aPedidoProduto.quantidade.ToString = EmptyStr) )then
+  begin
+    Result := False;
+    aMsg   := 'O campo Quantidade não pode ser zero (0). Verifique!';
+  end;
+
+  if (Result) then
+  begin
+    dao := TPedidoProdutoDAO.Create;
+
+    try
+      dao.Adicionar(aPedidoProduto);
+
+    finally
+       FreeAndNil(dao);
+    end;
+
+  end;
+  {$endregion}
+
+
+end;
+
+function TPedidoProdutoCTRL.Alterar(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+
+var
+  dao: TPedidoProdutoDAO;
+begin
+  {$region 'alterar'}
+  Result := True;
+  aMsg   := EmptyStr;
+
+  dao := TPedidoProdutoDAO.Create;
+  try
+      dao.Alterar(aPedidoProduto);
+  finally
+     FreeAndNil(dao);
+  end;
+  {$endregion}
+
+end;
+
+function TPedidoProdutoCTRL.Excluir(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+var
+  dao: TPedidoProdutoDAO;
+begin
+  {$region 'excluir'}
+  Result := True;
+  aMsg   := EmptyStr;
+
+  if (aPedidoProduto.codigo.ToString = EmptyStr) then
+  begin
+    Result := False;
+    aMsg   := 'Não há registro para excluir. Verifique!';
+  end;
+
+  if (Result) then
+  begin
+    dao := TPedidoProdutoDAO.Create;
+
+    try
+      dao.Excluir(aPedidoProduto);
+    finally
+       FreeAndNil(dao);
+    end;
+
+  end;
+  {$endregion}
+
+end;
+
+function TPedidoProdutoCTRL.Pesquisar(aPedidoProduto: TPedidoProduto;
+  aDataSet: TFDMemTable; aPesquisa: String): Boolean;
+
+var
+  dao: TPedidoProdutoDAO;
+begin
+  {$region 'pesquisar'}
+  Result := True;
+  dao := TPedidoProdutoDAO.Create;
+
+  try
+    dao.Pesquisar(aPedidoProduto, aDataSet, aPesquisa);
+  finally
+     FreeAndNil(dao);
+  end;
+  {$endregion}
+
+
+
+end;
+
+end.

@@ -1,0 +1,162 @@
+unit Form.View.Menu.Principal;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+  Vcl.Imaging.jpeg, Vcl.CategoryButtons, Vcl.WinXCtrls, System.Actions,
+  Vcl.ActnList, System.ImageList, Vcl.ImgList;
+
+type
+  TFormViewMenuPrincipal = class(TForm)
+    pnlPrincipal: TPanel;
+    imgTop: TImage;
+    Label3: TLabel;
+    Label2: TLabel;
+    Label1: TLabel;
+    ImageList1: TImageList;
+    ImageList2: TImageList;
+    actPrincipal: TActionList;
+    actCadastros: TAction;
+    actRelatorios: TAction;
+    actClose: TAction;
+    actDetalhe: TActionList;
+    actCategoria: TAction;
+    actProduto: TAction;
+    spvPrincipal: TSplitView;
+    Image4: TImage;
+    CategoryButtonsPrincipal: TCategoryButtons;
+    CategoryButtonsConfiguracao: TCategoryButtons;
+    spvCadastro: TSplitView;
+    CategoryButtonsCadastro: TCategoryButtons;
+    spvRelatorio: TSplitView;
+    CategoryButtonsRelatorio: TCategoryButtons;
+    actEntradaProduto: TAction;
+    actSaidaProduto: TAction;
+    actMovimentacao: TAction;
+    actUsuario: TAction;
+    procedure lblSairClick(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure actCadastrosExecute(Sender: TObject);
+    procedure actRelatoriosExecute(Sender: TObject);
+    procedure actCategoriaExecute(Sender: TObject);
+    procedure actProdutoExecute(Sender: TObject);
+    procedure actEntradaProdutoExecute(Sender: TObject);
+    procedure actSaidaProdutoExecute(Sender: TObject);
+    procedure actMovimentacaoExecute(Sender: TObject);
+    procedure actUsuarioExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FActiveForm: TForm;
+    procedure ShowForm(const AFormClass: TComponentClass; var AForm);
+
+  public
+    { Public declarations }
+  end;
+
+var
+  FormViewMenuPrincipal: TFormViewMenuPrincipal;
+
+implementation
+
+uses
+  Form.View.Categoria.Cad, Form.View.Produto.Cad,
+  Form.View.Movimentacao.Entrada.Cad, Form.View.Movimentacao.Saida.Cad,
+  Form.View.Relatorio.Estoque, Form.View.Usuario.Cad;
+
+{$R *.dfm}
+
+procedure TFormViewMenuPrincipal.actCadastrosExecute(Sender: TObject);
+begin
+  if (spvPrincipal.Opened) then
+    spvPrincipal.Close;
+
+  if (spvRelatorio.Opened) then
+    spvRelatorio.Close;
+
+  spvCadastro.Open;
+
+end;
+
+procedure TFormViewMenuPrincipal.actCategoriaExecute(Sender: TObject);
+var
+  LForm: TFormViewCategoriaCad;
+begin
+  Application.CreateForm(TFormViewCategoriaCad, LForm);
+  ShowForm(TFormViewCategoriaCad, LForm);
+end;
+
+procedure TFormViewMenuPrincipal.actCloseExecute(Sender: TObject);
+begin
+   Application.Terminate;
+end;
+
+procedure TFormViewMenuPrincipal.actEntradaProdutoExecute(Sender: TObject);
+var
+  LForm: TFormViewMovimentacaoEntradaCad;
+begin
+  Application.CreateForm(TFormViewMovimentacaoEntradaCad, LForm);
+  ShowForm(TFormViewMovimentacaoEntradaCad, LForm);
+end;
+
+procedure TFormViewMenuPrincipal.actMovimentacaoExecute(Sender: TObject);
+var
+  LForm: TFormViewRelatorioEstoque;
+begin
+  Application.CreateForm(TFormViewRelatorioEstoque, LForm);
+  ShowForm(TFormViewRelatorioEstoque, LForm);
+end;
+
+procedure TFormViewMenuPrincipal.actProdutoExecute(Sender: TObject);
+var
+  LForm: TFormViewProdutoCad;
+begin
+  Application.CreateForm(TFormViewProdutoCad, LForm);
+  ShowForm(TFormViewProdutoCad, LForm);
+end;
+
+procedure TFormViewMenuPrincipal.actRelatoriosExecute(Sender: TObject);
+begin
+  if (spvCadastro.Opened) then
+    spvCadastro.Close;
+
+  if (spvPrincipal.Opened) then
+    spvPrincipal.Close;
+
+  spvRelatorio.Open;
+end;
+
+procedure TFormViewMenuPrincipal.actSaidaProdutoExecute(Sender: TObject);
+var
+  LForm: TFormViewMovimentacaoSaidaCad;
+begin
+  Application.CreateForm(TFormViewMovimentacaoSaidaCad, LForm);
+  ShowForm(TFormViewMovimentacaoSaidaCad, LForm);
+end;
+
+procedure TFormViewMenuPrincipal.actUsuarioExecute(Sender: TObject);
+var
+  LForm: TFormViewUsuarioCad;
+begin
+  Application.CreateForm(TFormViewUsuarioCad, LForm);
+  ShowForm(TFormViewUsuarioCad, LForm);
+
+end;
+
+procedure TFormViewMenuPrincipal.lblSairClick(Sender: TObject);
+begin
+   Application.Terminate;
+end;
+
+procedure TFormViewMenuPrincipal.ShowForm(const AFormClass: TComponentClass;
+  var AForm);
+begin
+  if Assigned(FActiveForm) then
+    FActiveForm.Close;
+
+  TForm(AForm).Show;
+  FActiveForm := TForm(AForm);
+end;
+
+end.

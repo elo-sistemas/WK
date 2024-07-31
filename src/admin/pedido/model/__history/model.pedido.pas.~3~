@@ -1,0 +1,24 @@
+unit model.pedido;
+
+interface
+
+type
+  TPedido = class
+    private
+    Fcodigo: integer;
+    Fcodigo_cli: integer;
+    Fdata_emissao: TDateTime;
+    Fvalor_total: string;
+      {private declarations}
+    public
+
+    property codigo: integer read Fcodigo write Fcodigo;
+    property codigo_cli: integer read Fcodigo_cli write Fcodigo_cli;
+    property data_emissao: TDateTime read Fdata_emissao write Fdata_emissao;
+    property valor_total: string read Fvalor_total write Fvalor_total;
+  end;
+
+implementation
+
+
+end.

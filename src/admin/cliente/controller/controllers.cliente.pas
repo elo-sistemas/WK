@@ -1,0 +1,46 @@
+unit controllers.cliente;
+
+interface
+
+uses
+  model.cliente,
+  dao.cliente,
+  System.SysUtils,
+  Datasnap.DBClient,
+  FireDAC.Comp.Client;
+
+type
+  TClienteCTRL = class
+    private
+      {private declarations}
+
+    public
+      function Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable; aPesquisa: String):Boolean;
+
+  end;
+
+
+implementation
+
+{ TPedidoCTRL }
+
+function TClienteCTRL.Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable;
+  aPesquisa: String): Boolean;
+
+var
+  dao: TClienteDAO;
+begin
+  {$region 'pesquisar'}
+  Result := True;
+  dao := TClienteDAO.Create;
+
+  try
+    dao.Pesquisar(aCliente, aDataSet, aPesquisa);
+  finally
+    FreeAndNil(dao);
+  end;
+  {$endregion}
+
+end;
+
+end.

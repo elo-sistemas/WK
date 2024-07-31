@@ -1,0 +1,210 @@
+unit dao.pedido;
+
+interface
+
+uses
+  model.pedido,
+  DAO.Connection,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  FireDAC.Phys.FB,
+  Data.DB,
+  System.SysUtils,
+  System.StrUtils;
+
+type
+  TPedidoDAO = class
+  private
+     {private declarations}
+
+    fConn: TFDConnection;
+    aQRY: TFDQuery;
+
+  procedure CriarConexao;
+
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Adicionar(aPedido: TPedido);
+      procedure Alterar(aPedido: TPedido);
+      procedure Excluir(aPedido: TPedido);
+      procedure Pesquisar(aPedido: TPedido; aDataSet: TFDMemTable; aPesquisa: String);
+
+  end;
+
+implementation
+
+{ TPedidoDAO }
+
+procedure TPedidoDAO.Adicionar(aPedido: TPedido);
+begin
+  {$region 'adicionar'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('INSERT INTO PEDIDO(codigo, codigo_cli, data_emissao, valor_total) ');
+      aQRY.SQL.Add('VALUES(:codigo, :codigo_cli, :data_emissao, :valor_total)         ');
+
+      aQRY.ParamByName('codigo').AsInteger        := TConnection.GetGenID('codigo','pedido');
+      aQRY.ParamByName('codigo_cli').AsInteger    := aPedido.codigo_cli;
+      aQRY.ParamByName('data_emissao').AsDateTime := aPedido.data_emissao;
+      aQRY.ParamByName('valor_total').AsString    := aPedido.valor_total.ToString;
+
+      aQRY.ExecSQL;
+      fConn.Commit;
+
+      aPedido.codigo := aQRY.ParamByName('codigo').AsInteger;  //devolve o código gerado para a tela de pedidos
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao gravar o pedido. Verifique! '+ e.Message);
+      end;
+    end;
+
+  finally
+    aQRY.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+procedure TPedidoDAO.Alterar(aPedido: TPedido);
+begin
+  {$region 'alterar'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('UPDATE pedido SET codigo_cli =:codigo_cli,    '); //neste caso só podem ser alterados os campos de clientes e data de emissão
+      aQRY.SQL.Add('                  data_emissao =:data_emissao ');
+      aQRY.SQL.Add('WHERE codigo =:codigo                         ');
+
+      aQRY.ParamByName('codigo').AsInteger        := aPedido.codigo;
+      aQRY.ParamByName('codigo_cli').AsInteger    := aPedido.codigo_cli;
+      aQRY.ParamByName('data_emissao').AsDateTime := aPedido.data_emissao;
+
+      aQRY.ExecSQL;
+      fConn.Commit;
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao alterar o pedido. Verifique! '+ e.Message);
+      end;
+    end;
+
+  finally
+    aQRY.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+constructor TPedidoDAO.Create;
+begin
+  fConn := TConnection.CreateConnection;
+
+end;
+
+procedure TPedidoDAO.CriarConexao;
+begin
+  aQRY            := TFDQuery.Create(nil);
+  aQRY.Connection := FConn;
+
+end;
+
+destructor TPedidoDAO.Destroy;
+begin
+  if (Assigned(fConn) ) then
+    fConn.DisposeOf;
+
+  inherited;
+end;
+
+procedure TPedidoDAO.Excluir(aPedido: TPedido);
+begin
+  {$region 'excluir'}
+  CriarConexao;
+  try
+    try
+      fConn.StartTransaction;
+
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('DELETE FROM pedido    ');
+      aQRY.SQL.Add('WHERE codigo =:codigo ');
+
+      aQRY.ParamByName('codigo').AsInteger := aPedido.codigo;
+      aQRY.ExecSQL;
+
+      fConn.Commit;
+    Except on
+      E: Exception do
+      begin
+        fConn.Rollback;
+        raise Exception.Create('Erro ao excluir o pedido. Verifique! '+ e.Message);
+      end;
+
+    end;
+
+  finally
+    aQRY.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+procedure TPedidoDAO.Pesquisar(aPedido: TPedido; aDataSet: TFDMemTable;
+  aPesquisa: String);
+begin
+  {$region 'pesquisar'}
+  CriarConexao;
+  try
+    try
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('select p.codigo, p.data_emissao, p.valor_total, p.codigo_cli, c.nome ');
+      aQRY.SQL.Add('FROM pedido p inner join cliente c on c.codigo = p.codigo_cli        ');
+
+      if (aPesquisa <> EmptyStr) then
+      begin
+        if (TConnection.Numero(aPesquisa) ) then
+        begin
+          aQRY.SQL.Add('WHERE p.codigo =:codigo ');
+          aQRY.Params.ParamByName('codigo').AsInteger := aPesquisa.ToInteger;
+        end
+
+        else
+        begin
+          aQRY.SQL.Add('WHERE UPPER(c.nome) LIKE :nome ');
+          aQRY.Params.ParamByName('nome').AsString  := '%' + AnsiUpperCase(aPesquisa) + '%';
+        end;
+
+      end;
+
+      aQRY.SQL.Add('ORDER BY p.codigo ');
+      aQRY.Open;
+
+      aDataSet.Data := aQRY.Data;
+
+    Except on
+      E: Exception do
+        raise Exception.Create('Erro ao pesquisar o(s) registro(s). Verifique! '+ e.Message);
+    end;
+
+  finally
+    aQRY.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+end.

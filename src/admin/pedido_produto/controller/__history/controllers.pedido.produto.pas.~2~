@@ -1,0 +1,99 @@
+unit controllers.pedido.produto;
+
+interface
+
+uses
+  model.pedido.produto,
+  dao.pedido.produto,
+  System.SysUtils,
+  Datasnap.DBClient,
+  FireDAC.Comp.Client;
+
+type
+  TPedidoCTRL = class
+    private
+      {private declarations}
+
+    public
+      function Adicionar(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Alterar(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Excluir(aPedidoProduto: TPedidoProduto; var aMsg: String): Boolean;
+      function Pesquisar(aPedidoProduto: TPedidoProduto; aDataSet: TFDMemTable; aPesquisa: String):Boolean;
+
+  end;
+
+
+implementation
+
+{ TPedidoCTRL }
+
+function TPedidoCTRL.Adicionar(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+
+var
+  dao: TPedidoProdutoDAO;
+begin
+  {$region 'adicionar'}
+  Result := True;
+  aMsg   := EmptyStr;
+
+  if ( (aPedidoProduto.codigo_prod = 0) or (aPedidoProduto.codigo_prod.ToString = EmptyStr)) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Produto é obrigatório. Verifique!';
+  end;
+
+  if (aPedidoProduto.valor_total = 0) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Valor total não pode ser zero (0). Verifique!';
+  end;
+
+  if (aPedidoProduto.valor_unitario = 0) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Valor unitário não pode ser zero (0). Verifique!';
+  end;
+
+  if (aPedidoProduto.quantidade = 0) then
+  begin
+    Result := False;
+    aMsg   := 'O campo Quantidade não pode ser zero (0). Verifique!';
+  end;
+
+  if (Result) then
+  begin
+    dao := TPedidoDAO.Create;
+
+    try
+      dao.Adicionar(aPedido);
+
+    finally
+       FreeAndNil(dao);
+    end;
+
+  end;
+  {$endregion}
+
+
+end;
+
+function TPedidoCTRL.Alterar(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+begin
+
+end;
+
+function TPedidoCTRL.Excluir(aPedidoProduto: TPedidoProduto;
+  var aMsg: String): Boolean;
+begin
+
+end;
+
+function TPedidoCTRL.Pesquisar(aPedidoProduto: TPedidoProduto;
+  aDataSet: TFDMemTable; aPesquisa: String): Boolean;
+begin
+
+end;
+
+end.

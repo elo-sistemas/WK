@@ -1,0 +1,105 @@
+unit dao.cliente;
+
+interface
+
+uses
+  model.cliente,
+  DAO.Connection,
+  FireDAC.Comp.Client,
+  FireDAC.DApt,
+  FireDAC.Phys.FB,
+  Data.DB,
+  System.SysUtils,
+  System.StrUtils;
+
+type
+  TClienteDAO = class
+  private
+     {private declarations}
+
+    fConn: TFDConnection;
+    aQRY: TFDQuery;
+
+  procedure CriarConexao;
+
+   public
+      constructor Create;
+      destructor Destroy; override;
+      procedure Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable; aPesquisa: String);
+
+  end;
+
+
+
+
+implementation
+
+{ TClienteDAO }
+
+constructor TClienteDAO.Create;
+begin
+  fConn := TConnection.CreateConnection;
+
+end;
+
+procedure TClienteDAO.CriarConexao;
+begin
+  aQRY            := TFDQuery.Create(nil);
+  aQRY.Connection := FConn;
+
+end;
+
+destructor TClienteDAO.Destroy;
+begin
+  if (Assigned(fConn) ) then
+    fConn.DisposeOf;
+
+  inherited;
+end;
+
+procedure TClienteDAO.Pesquisar(aCliente: TCliente; aDataSet: TFDMemTable;
+  aPesquisa: String);
+begin
+  {$region 'pesquisar'}
+  CriarConexao;
+  try
+    try
+      aQRY.Close;
+      aQRY.sql.Clear;
+      aQRY.SQL.Add('select codigo, nome, cidade, estado ');
+      aQRY.SQL.Add('FROM cliente                        ');
+
+      if (aPesquisa <> EmptyStr) then
+      begin
+        if (TConnection.Numero(aPesquisa) ) then
+        begin
+          aQRY.SQL.Add('WHERE codigo =:codigo ');
+          aQRY.Params.ParamByName('codigo').AsInteger := aPesquisa.ToInteger;
+        end
+
+        else
+        begin
+          aQRY.SQL.Add('WHERE UPPER(nome) LIKE :nome ');
+          aQRY.Params.ParamByName('nome').AsString  := '%' + AnsiUpperCase(aPesquisa) + '%';
+        end;
+
+      end;
+
+      aQRY.SQL.Add('ORDER BY codigo ');
+      aQRY.Open;
+
+      aDataSet.Data := aQRY.Data;
+
+    Except on
+      E: Exception do
+        raise Exception.Create('Erro ao pesquisar o(s) registro(s). Verifique! '+ e.Message);
+    end;
+
+  finally
+    aQRY.DisposeOf;
+  end;
+  {$endregion}
+
+end;
+
+end.

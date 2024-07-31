@@ -1,0 +1,10 @@
+inherited FormViewPesquisaProduto: TFormViewPesquisaProduto
+  Caption = ''
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited lblSubTitulo: TLabel
+    Width = 63
+    Caption = 'Produtos'
+    ExplicitWidth = 63
+  end
+end

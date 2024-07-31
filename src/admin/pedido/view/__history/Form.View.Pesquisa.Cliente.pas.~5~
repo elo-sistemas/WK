@@ -1,0 +1,102 @@
+unit Form.View.Pesquisa.Cliente;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Form.View.Pesquisa.Padrao, Data.DB,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Imaging.pngimage, Vcl.Grids, Vcl.DBGrids, Vcl.Imaging.jpeg,
+  model.cliente, controllers.cliente;
+
+type
+  TFormViewPesquisaCliente = class(TFormViewPesquisaPadrao)
+    procedure FormShow(Sender: TObject);
+    procedure imgPesquisarClick(Sender: TObject);
+    procedure dbgPadraoDblClick(Sender: TObject);
+  private
+    Fnome: string;
+    aCliente: TCliente;
+    aClienteCTRL: TClienteCTRL;
+
+    { Private declarations }
+  public
+    { Public declarations }
+    property nome: string read Fnome write Fnome;
+
+  end;
+
+var
+  FormViewPesquisaCliente: TFormViewPesquisaCliente;
+
+implementation
+
+{$R *.dfm}
+
+procedure TFormViewPesquisaCliente.dbgPadraoDblClick(Sender: TObject);
+begin
+  inherited;
+  if (dsMestre.DataSet.RecordCount > 0) then
+  begin
+    Pk          := StrToInt(dbgPadrao.Columns[0].Field.Text);
+    nome        := dbgPadrao.Columns[1].Field.Text;
+    ModalResult := mrOk;
+  end;
+
+end;
+
+procedure TFormViewPesquisaCliente.FormShow(Sender: TObject);
+begin
+  inherited;
+  {$region  'cliente'}
+  MemTable.Close;
+  dsMestre.DataSet := MemTable;
+  dbgPadrao.Columns.Add;
+  dbgPadrao.Columns[0].FieldName       := 'codigo';
+  dbgPadrao.Columns[0].Width           := 70;
+  dbgPadrao.Columns[0].Title.Caption   := 'Código';
+  dbgPadrao.Columns[0].Title.Font.Size := 13;
+
+  dbgPadrao.Columns.Add;
+  dbgPadrao.Columns[1].FieldName       := 'nome';
+  dbgPadrao.Columns[1].Width           := 350;
+  dbgPadrao.Columns[1].Title.Caption   := 'Nome do cliente';
+  dbgPadrao.Columns[1].Title.Font.Size := 13;
+
+  dbgPadrao.Columns.Add;
+  dbgPadrao.Columns[2].FieldName       := 'cidade';
+  dbgPadrao.Columns[2].Width           := 200;
+  dbgPadrao.Columns[2].Title.Caption   := 'Cidade';
+  dbgPadrao.Columns[2].Title.Font.Size := 13;
+
+  dbgPadrao.Columns.Add;
+  dbgPadrao.Columns[3].FieldName       := 'estado';
+  dbgPadrao.Columns[3].Width           := 50;
+  dbgPadrao.Columns[3].Title.Caption   := 'Estado';
+  dbgPadrao.Columns[3].Title.Font.Size := 13;
+
+  edtpesquisar.TextHint := 'Digite o código e /ou parte do nome do cliente para pesquisar';
+  {$endregion}
+
+end;
+
+procedure TFormViewPesquisaCliente.imgPesquisarClick(Sender: TObject);
+begin
+  inherited;
+  aCliente     := TCliente.Create;
+  aClienteCTRL := TClienteCTRL.Create;
+
+  MemTable.Close;
+  try
+    aClienteCTRL.Pesquisar(aCliente, MemTable, Trim(edtPesquisar.Text));
+
+  finally
+    FreeAndNil(aCliente);
+    FreeAndNil(aClienteCTRL);
+  end;
+
+end;
+
+end.

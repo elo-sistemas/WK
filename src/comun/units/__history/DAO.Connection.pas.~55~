@@ -1,0 +1,103 @@
+unit DAO.Connection;
+
+interface
+
+uses System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option,
+  FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys,
+  Data.DB, FireDAC.Comp.Client, System.IniFiles, FireDAC.Phys.FBDef,
+  FireDAC.Phys.IBBase, FireDAC.Phys.FB, Vcl.Forms, Vcl.Dialogs,
+  FireDAC.Phys.MSSQL, FireDAC.Phys.MSSQLDef, FireDAC.ConsoleUI.Wait,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt, FireDAC.Comp.DataSet,
+  System.JSON, System.Generics.Collections;
+
+type
+    TConnection = class
+    private
+
+    conn: TFDConnection;
+    public
+      class procedure CarregarConfig(Connection: TFDConnection);
+      class function CreateConnection: TFDConnection;
+      class function GetGenID(strCampo: String; strTabela: String): Integer;
+      class function Numero(S: String): Boolean;
+    end;
+
+implementation
+
+{ TConnection }
+
+class procedure TConnection.CarregarConfig(Connection: TFDConnection);
+begin
+   Connection.DriverName                    := 'PG';
+   Connection.LoginPrompt                   := False;
+   Connection.Params.Values['Port']         := '5432';
+   Connection.Params.Database               := 'teste_marcio';
+   Connection.Params.UserName               := 'postgres';
+   Connection.Params.Password               := 'root';
+end;
+
+class function TConnection.CreateConnection: TFDConnection;
+
+var
+  Conn: TFDConnection;
+begin
+  Conn := TFDConnection.Create(nil);
+  CarregarConfig(Conn);
+  Result := Conn;
+end;
+
+class function TConnection.GetGenID(strCampo, strTabela: String): Integer;
+var
+  vTempClient: TFDQuery;
+
+Begin
+  Result                 := -1;
+  vTempClient            := TFDQuery.Create(nil);
+  vTempClient.Connection := CreateConnection;
+
+  try
+
+    try
+      vTempClient.SQL.Clear;
+      vTempClient.SQL.Add('Select COALESCE(Max(' + strCampo + '),0) As Total From ' + strTabela);
+      vTempClient.Open;
+
+      Result := vTempClient.FieldByName('Total').AsInteger;
+
+      if (Result = 0) then
+        Result := 1
+      else
+        Result := Result + 1;
+
+      vTempClient.Close;
+
+    except On
+    e: Exception do
+      raise Exception.Create('Erro ao retornar o registro. Verifique!' +e.Message);
+  end;
+
+  finally
+    vTempClient.DisposeOf;
+  end;
+
+end;
+
+class function TConnection.Numero(S: String): Boolean;
+var
+  I: Integer;
+begin
+  Result := True;
+  for I := 1 to Length(S) do
+  begin
+    if (NOT (S[I] in ['0'..'9']) ) then
+    begin
+      Result := False;
+      Break;
+    end;
+
+  end;
+
+end;
+
+end.
