@@ -1,0 +1,155 @@
+-- Database: teste_marcio
+
+-- DROP DATABASE IF EXISTS teste_marcio;
+
+CREATE DATABASE teste_marcio
+    
+-------------------------------------------------------------------------------------------------
+CREATE TABLE cliente (
+  codigo bigint NOT NULL,
+  nome character varying(100) NOT NULL,
+  cidade character varying(100) NOT NULL,
+  estado character varying(2) NOT NULL,
+  CONSTRAINT pk_cliente PRIMARY KEY (codigo)
+);
+CREATE INDEX idx_codigo ON cliente(codigo);
+
+
+CREATE TABLE produto (
+  codigo bigint NOT NULL,
+  descricao character varying(100) NOT NULL,
+  valor_total numeric(10,2) NOT NULL DEFAULT 0 CHECK(valor_total > 0.0),
+  CONSTRAINT pk_produto PRIMARY KEY (codigo)
+);
+CREATE INDEX idx_codigo ON produto(codigo);
+CREATE INDEX idx_descricao ON produto(descricao);
+
+CREATE TABLE pedido (
+  codigo bigint NOT NULL,
+  codigo_cli bigint NOT NULL,
+  data_emissao date NOT NULL,
+  valor_total numeric(10,2) NOT NULL DEFAULT 0 CHECK(valor_total > 0.0),
+  CONSTRAINT pk_pedido PRIMARY KEY (codigo),
+  CONSTRAINT fk_pedido_cliente FOREIGN KEY (codigo_cli) REFERENCES cliente(codigo) ON DELETE CASCADE
+);
+
+
+CREATE TABLE pedido_produto (
+  codigo bigint NOT NULL auto_increment,
+  codigo_ped bigint NOT NULL,
+  codigo_prod bigint NOT NULL,
+  quantidade int NOT NULL DEFAULT 0 CHECK(quantidade > 0.0),
+  valor_unitario numeric(10,2) NOT NULL DEFAULT 0 CHECK(valor_unitario > 0.0),	
+  valor_total numeric(10,2) NOT NULL DEFAULT 0 CHECK(valor_total > 0.0),
+  CONSTRAINT pk_pedido_produto PRIMARY KEY (codigo),
+  CONSTRAINT fk_codigo_ped FOREIGN KEY (codigo_ped) REFERENCES pedido(codigo) ON DELETE CASCADE,
+  CONSTRAINT fk_codigo_prod FOREIGN KEY (codigo_prod) REFERENCES produto(codigo) ON DELETE CASCADE
+);
+
+-------------------------------------------------------------------------------------------------
+
+INSERT INTO cliente(
+	codigo, nome, cidade, estado)
+	VALUES
+	(1, 'sr. das Galáxias', 'BELO HORIZONTE', 'MG'),
+	(2, 'Jedis e Cia', 'BELO HORIZONTE', 'MG'),
+        (3, 'Pão e cia', 'BELO HORIZONTE', 'MG'),
+        (4, 'Galeria do Ourives', 'BELO HORIZONTE', 'MG'),
+        (5, '20 ervas', 'RIO DE JANEIRO', 'RJ'),    
+        (6, 'Javier Soros', 'RIO DE JANEIRO', 'RJ'), 
+        (7, 'Clínica Alves', 'RIO DE JANEIRO', 'RJ'),
+        (8, 'Clínica Alves', 'RIO DE JANEIRO', 'RJ'),
+        (9, 'Roupas da Moda', 'SÃO PAULO', 'SP'),
+        (10, 'Moda & Moda', 'SÃO PAULO', 'SP'),
+        (11, 'Feminina Roupas', 'SÃO PAULO', 'SP'),
+        (12, 'Ferraz Advogados e CIA', 'CURITIBA', 'PR'),
+        (13, 'Doces doces', 'CURITIBA', 'PR'),
+        (14, 'Amargo Doce', 'CURITIBA', 'PR'),
+        (15, 'Vida Natural', 'CURITIBA', 'PR'),
+        (16, 'Corpo Bom', 'FORTALEZA', 'CE'),
+        (17, 'Água saudável', 'FORTALEZA', 'CE'),
+        (18, 'Câmara Municipal', 'FORTALEZA', 'CE'),
+        (19, 'Seja Feliz', 'FORTALEZA', 'CE'),
+        (20, 'Valeu Zumbi', 'FORTALEZA', 'CE'),
+        (21, 'Amigo Pat', 'FORTALEZA', 'CE'),
+        (22, 'A Cura Natural', 'FORTALEZA', 'CE');
+
+-----------------------------------------------------------------------------------------------------------
+
+INSERT INTO public.produto(
+	codigo, descricao, valor_total)
+	VALUES 
+	(1, 'Água Mineral', 2.50),
+	(2, 'Pão de sal', 4.99),
+	(3, 'Pão de doce', 5.99),	
+        (4, 'Manteiga', 6.99),
+	(5, 'Chá Mate', 3.99),
+	(6, 'Sabão em Pó', 13.50),
+	(7, 'Sal', 1.99),
+	(8, 'Sabão em barra', 7.99),
+	(9, 'Cerveja Skol', 4.99),
+	(10, 'Coca-Cola',8.99),
+	(11, 'Detergente Minerva', 1.99),
+	(12, 'Caixa de bombom Garoto', 9.99),
+	(13, 'Leite', 3.59),
+	(14, 'Doce de leite', 5.99),	
+        (15, 'Vinho tinto', 60.00),
+        (16, 'Arroz', 30.00),
+        (17, 'Feijão', 9.80),
+        (18, 'Creme de leite', 3.99),
+        (19, 'Bicarbonato de sódio', 2.50),
+        (20, 'Café', 7.50),
+        (21, 'Papel higiênico', 10.90),
+        (22, 'Nescau', 4.90),
+        (23, 'Milho de pipoca', 4.99),
+        (24, 'Cesta básica', 117.00),
+        (25, 'Vinagre', 2.50);
+
+-----------------------------------------------------------------------------------------------------------
+-- SEQUENCE: public.codigo_pedido_produto_seq
+
+-- DROP SEQUENCE IF EXISTS public.codigo_pedido_produto_seq;
+
+CREATE SEQUENCE IF NOT EXISTS public.codigo_pedido_produto_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    CACHE 1;
+
+ALTER SEQUENCE public.codigo_pedido_produto_seq
+    OWNER TO postgres;
+
+-- FUNCTION: public.incrementa_sequence_pedido_produto()
+
+-- DROP FUNCTION IF EXISTS public.incrementa_sequence_pedido_produto();
+
+
+-----------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.incrementa_sequence_pedido_produto()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+BEGIN
+  NEW.codigo := nextval('codigo_pedido_produto_seq');
+  RETURN NEW;
+END;
+$BODY$;
+
+ALTER FUNCTION public.incrementa_sequence_pedido_produto()
+    OWNER TO postgres;
+
+-----------------------------------------------------------------------------------------------------------
+-- Trigger: incrementa_sequence_pedido_produto
+
+-- DROP TRIGGER IF EXISTS incrementa_sequence_pedido_produto ON public.pedido_produto;
+
+CREATE OR REPLACE TRIGGER incrementa_sequence_pedido_produto
+    BEFORE INSERT
+    ON public.pedido_produto
+    FOR EACH ROW
+    EXECUTE FUNCTION public.incrementa_sequence_pedido_produto();
+
+
